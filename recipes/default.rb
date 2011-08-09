@@ -17,4 +17,24 @@
 # limitations under the License.
 #
 
-package 'rsync'
+package "rsync"
+
+directory "/etc/rsync.d"
+
+script "enable_rsync" do
+  interpreter "bash"
+  code <<-EOH
+  ls /etc/rsync.d/*.conf > /dev/null 2>&1
+  if [ $? -eq 0 ]
+  then
+    cat /etc/rsync.d/*.conf > /etc/rsyncd.conf
+    sed -i 's/RSYNC_ENABLE=false/RSYNC_ENABLE=true/' /etc/default/rsync
+  fi
+  EOH
+  notifies :start, "service[rsync]", :immediate
+end
+
+service "rsync" do
+  supports :restart => true, :reload => true, :status => true
+  action [ :enable ]
+end

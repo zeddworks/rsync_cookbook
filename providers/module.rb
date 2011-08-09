@@ -5,8 +5,9 @@ action :create do
   uid = new_resource.uid
   gid = new_resource.gid
 
-  template "/etc/#{module_name}.conf" do
+  template "/etc/rsync.d/#{module_name}.conf" do
     source "rsyncd-module.erb"
+    mode "0755"
     cookbook "rsync"
     variables({
       :module_name => module_name,
@@ -15,7 +16,6 @@ action :create do
       :uid => uid,
       :gid => gid
     })
-    notifies :reload, resources(:service => "rsync"), :delayed
+    notifies :run, resources(:script => "enable_rsync"), :delayed
   end
-
 end
